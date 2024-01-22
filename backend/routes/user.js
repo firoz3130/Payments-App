@@ -136,6 +136,15 @@ router.get("/bulk", async (req, res) => {
     })
 })
 
+router.get("/balance",authMiddleware,async(res,req)=>{
+    const account=await account.findOne({
+        userId:req.userId
+    })
+    res.json({
+        balance:account.balance
+    })
+})
+
 const router = express.Router();
 
 module.exports = router;
