@@ -3,7 +3,7 @@ const zod=require("zod");
 const {User, Account}=require("../db");
 const { sign } = require("jsonwebtoken");
 const {authMiddleware}=require("../middleware");
-
+const router = express.Router(); // Initialize router
 const userSchema=zod.object({
     username:zod.string(),
     password:zod.string(),
@@ -11,7 +11,8 @@ const userSchema=zod.object({
     lastName:zod.string()
 });
 
-router.post("/signup", async (req, res) => {
+
+router.post("/signup", async (req, res) => { 
     const { success } = signupBody.safeParse(req.body)
     if (!success) {
         return res.status(411).json({
@@ -145,6 +146,6 @@ router.get("/balance",authMiddleware,async(res,req)=>{
     })
 })
 
-const router = express.Router();
+
 
 module.exports = router;
