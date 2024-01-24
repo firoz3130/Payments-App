@@ -4,7 +4,7 @@ const {User, Account}=require("../db");
 const { sign } = require("jsonwebtoken");
 const {authMiddleware}=require("../middleware");
 const router = express.Router(); // Initialize router
-const userSchema=zod.object({
+const signupBody=zod.object({
     username:zod.string(),
     password:zod.string(),
     firstName:zod.string(),

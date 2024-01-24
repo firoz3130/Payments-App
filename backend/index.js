@@ -10,7 +10,7 @@ const mainRouter = require("./routes/index");
 
 
 app.use("/api/v1", mainRouter);
-app.listen(8000, () => {
-    console.log("Server started");
+app.listen(3000, () => {
+    console.log("Server started at port 3000\n go to http://localhost:3000/api/v1");
 }
 );
