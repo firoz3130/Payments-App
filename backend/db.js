@@ -1,13 +1,21 @@
 // backend/db.js
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://localhost:27017/paytm").then(() => {    
-    console.log("Database connected");
-}).catch((err) => {
-    console.log("Error connecting to database");
-    console.log(err);
+// mongoose.connect('mongodb://localhost:27017/paytm').then(() => {
+//     console.log("Connected to MongoDB");
+// }).catch((err) => {
+//     console.log("Error connecting to MongoDB");
+//     console.log('And the error is =>'+err);
+// })
+const connect = async () => {
+    try {
+        await mongoose.connect('mongodb://127.0.0.1:27017/paytm');
+        console.log("Connected to MongoDB");
+    } catch (err) {
+        console.log("Error connecting to MongoDB");
+        console.log('And the error is =>' + err);
+    }
 }
-);  
 
 // Create a Schema for Users
 const userSchema = new mongoose.Schema({
@@ -57,4 +65,5 @@ const User = mongoose.model('User', userSchema);
 module.exports = {
 	User,
   Account,
+  connect
 };

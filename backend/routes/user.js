@@ -2,8 +2,13 @@ const express = require("express");
 const zod=require("zod");
 const {User, Account}=require("../db");
 const { sign } = require("jsonwebtoken");
+require('dotenv').config();
 const {authMiddleware}=require("../middleware");
+const {connect}=require("../db");
 const router = express.Router(); // Initialize router
+const jwt = require('jsonwebtoken');
+
+
 const signupBody=zod.object({
     username:zod.string(),
     password:zod.string(),
@@ -19,14 +24,15 @@ router.post("/signup", async (req, res) => {
             message: "Email already taken / Incorrect inputs"
         })
     }
-
+    let connection=await connect();
+    console.log(connection);
     const existingUser = await User.findOne({
         username: req.body.username
     })
 
     if (existingUser) {
         return res.status(411).json({
-            message: "Email already taken/Incorrect inputs"
+            message: "Already exist"
         })
     }
 
@@ -45,7 +51,7 @@ router.post("/signup", async (req, res) => {
 
     const token = jwt.sign({
         userId
-    }, JWT_SECRET);
+    },process.env.JWT_SECRET    );
 
     res.json({
         message: "User created successfully",
@@ -55,17 +61,21 @@ router.post("/signup", async (req, res) => {
 
 
 const signinBody = zod.object({
-    username: zod.string().email(),
+    username: zod.string(),
 	password: zod.string()
 })
 
 router.post("/signin", async (req, res) => {
+    console.log(req.body)
     const { success } = signinBody.safeParse(req.body)
+    console.log(success)
     if (!success) {
         return res.status(411).json({
             message: "Incorrect inputs"
         })
     }
+    let connection=await connect();
+    console.log(connection);
 
     const user = await User.findOne({
         username: req.body.username,
@@ -75,17 +85,18 @@ router.post("/signin", async (req, res) => {
     if (user) {
         const token = jwt.sign({
             userId: user._id
-        }, JWT_SECRET);
+        }, process.env.JWT_SECRET);
   
-        res.json({
+        res.json
+        ({
+            message: "Signed in successfully",
             token: token
         })
-        return;
     }
 
     
     res.status(411).json({
-        message: "Error while logging in"
+        message: "Wrong Password or Username"
     })
 })
 
@@ -94,7 +105,7 @@ const updateBody = zod.object({
     firstName: zod.string().optional(),
     lastName: zod.string().optional(),
 })
-
+//authMisddleware is used to check if the user is logged in or not
 router.put("/", authMiddleware, async (req, res) => {
     const { success } = updateBody.safeParse(req.body)
     if (!success) {
