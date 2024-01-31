@@ -1,12 +1,13 @@
+require('dotenv').config();
 const express = require("express");
 const zod=require("zod");
 const {User, Account}=require("../db");
-const { sign } = require("jsonwebtoken");
-require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET;
 const {authMiddleware}=require("../middleware");
 const {connect}=require("../db");
 const router = express.Router(); // Initialize router
 const jwt = require('jsonwebtoken');
+
 
 
 const signupBody=zod.object({
@@ -49,11 +50,11 @@ router.post("/signup", async (req, res) => {
         balance: 1+Math.random()*10000
     })
 
-    const token = jwt.sign({
+    const token =jwt.sign({
         userId
-    },process.env.JWT_SECRET    );
+    },JWT_SECRET);
 
-    res.json({
+  return  res.json({
         message: "User created successfully",
         token: token
     })
@@ -87,7 +88,7 @@ router.post("/signin", async (req, res) => {
             userId: user._id
         }, process.env.JWT_SECRET);
   
-        res.json
+       return res.json
         ({
             message: "Signed in successfully",
             token: token
@@ -95,17 +96,16 @@ router.post("/signin", async (req, res) => {
     }
 
     
-    res.status(411).json({
+   return res.status(411).json({
         message: "Wrong Password or Username"
     })
 })
-
 const updateBody = zod.object({
-	password: zod.string().optional(),
+    password: zod.string().optional(),
     firstName: zod.string().optional(),
     lastName: zod.string().optional(),
 })
-//authMisddleware is used to check if the user is logged in or not
+
 router.put("/", authMiddleware, async (req, res) => {
     const { success } = updateBody.safeParse(req.body)
     if (!success) {
@@ -114,14 +114,20 @@ router.put("/", authMiddleware, async (req, res) => {
         })
     }
 
-    await User.updateOne(req.body, {
-        id: req.userId
-    })
+    // Use the entire req.body object or create an object with specific fields
+    const updateFields = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+    };
 
-    res.json({
+    // Update based on username
+    await User.updateOne({ username: req.body.username }, updateFields);
+
+    return res.json({
         message: "Updated successfully"
     })
 })
+
 
 router.get("/bulk", async (req, res) => {
     const filter = req.query.filter || "";
@@ -138,7 +144,7 @@ router.get("/bulk", async (req, res) => {
         }]
     })
 
-    res.json({
+   return res.json({
         user: users.map(user => ({
             username: user.username,
             firstName: user.firstName,
@@ -152,7 +158,7 @@ router.get("/balance",authMiddleware,async(res,req)=>{
     const account=await account.findOne({
         userId:req.userId
     })
-    res.json({
+   return res.json({
         balance:account.balance
     })
 })
